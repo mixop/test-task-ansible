@@ -1,0 +1,7 @@
+---
+# vars file for deploy_app
+HOSTS: all
+project:
+  - "awesome"
+  - "incredible"
+  - "amazing"

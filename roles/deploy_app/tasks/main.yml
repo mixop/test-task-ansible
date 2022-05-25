@@ -1,0 +1,43 @@
+---
+# tasks file for deploy_app
+
+- name: install nginx and required packages
+  apt:
+    pkg:
+    - nginx
+    - gnupg
+    - software-properties-common
+    - apt-transport-https
+    update_cache: yes
+  notify: Start Nginx
+
+- block:
+    - set_fact: php_ver="7.4"
+
+    - name: add php{{ php_ver }} repository
+      apt_repository:
+        repo="ppa:ondrej/php"
+
+    - include_tasks: install-php.yml
+    - include_tasks: deploy.yml
+
+  when: ansible_distribution_release == "bionic"
+
+- block:
+    - set_fact: php_ver="8.1"
+
+    - name: add gpg repo key
+      apt_key:
+        url:  'https://packages.sury.org/php/apt.gpg'
+        state: present
+
+    - name: add php{{ php_ver }} repo
+      apt_repository:
+        repo:  'deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main'
+        state: present
+        filename: php
+
+    - include_tasks: install-php.yml
+    - include_tasks: deploy.yml
+
+  when: ansible_distribution_release == "buster" or ansible_distribution_release == "bullseye"

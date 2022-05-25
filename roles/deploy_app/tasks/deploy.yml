@@ -1,0 +1,41 @@
+- name: create users
+  user:
+    name: "{{ item }}"
+    state: present
+    shell: /sbin/nologin
+    create_home: no
+  with_items: "{{ project }}"
+
+- name: create nginx config
+  template:
+    src=site.conf.j2
+    dest=/etc/nginx/sites-available/{{ item }}.conf
+  with_items: "{{ project }}"
+
+- name: copy backend code
+  copy:
+    src=index.php
+    dest=/usr/share/nginx/html/index.php
+
+- name: create php-fpm pool configs for staging
+  template:
+    src=pool-staging.j2
+    dest=/etc/php/{{ php_ver }}/fpm/pool.d/{{ item }}.conf
+  with_items: "{{ project }}"
+  notify: Reload PHP-FPM
+  when: env == "staging"
+
+- name: create php-fpm pool configs for prod
+  template:
+    src=pool-prod.j2
+    dest=/etc/php/{{ php_ver }}/fpm/pool.d/{{ item }}.conf
+  with_items: "{{ project }}"
+  notify: Reload PHP-FPM
+  when: env == "prod"
+
+- name: activate nginx configs
+  file: src=/etc/nginx/sites-available/{{ item }}.conf
+        dest=/etc/nginx/sites-enabled/{{ item }}.conf
+        state=link
+  with_items: "{{ project }}"
+  notify: Reload Nginx

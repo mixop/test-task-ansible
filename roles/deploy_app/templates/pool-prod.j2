@@ -1,0 +1,20 @@
+[{{ item }}]
+
+listen = /run/php/php{{ php_ver }}-fpm-{{ item }}.sock
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+
+user = {{ item }}
+group = {{ item }}
+
+pm = dynamic
+pm.max_children = 20
+pm.start_servers = 4
+pm.min_spare_servers = 3
+pm.max_spare_servers = 6
+php_admin_value[memory_limit] = 128M
+
+env[APP_PROJECT_NAME] = {{ item }}
+env[APP_PROJECT_GROUP] = {{ group }}
+env[APP_ENV] = {{ env }}

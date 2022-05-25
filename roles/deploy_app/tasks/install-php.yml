@@ -1,0 +1,13 @@
+- name: install php{{ php_ver }}-fpm
+  apt:
+    pkg:
+    - php{{ php_ver }}-fpm
+    update_cache: yes
+  notify: Start PHP-FPM
+
+- name: php{{ php_ver }}-curl install
+  apt:
+    pkg:
+    - php{{ php_ver }}-curl
+    update_cache: yes
+  when: group == "two"
